@@ -1,0 +1,1000 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>GymPro</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#0f0f0f;color:#f0f0f0;font-family:system-ui,sans-serif}
+.app{max-width:960px;margin:0 auto;padding:1rem}
+.hidden{display:none!important}
+.card{background:#1a1a1a;border:1px solid #2e2e2e;border-radius:12px;padding:1.25rem;margin-bottom:1rem}
+.card-inner{background:#242424;border:1px solid #2e2e2e;border-radius:8px;padding:1rem;margin-bottom:8px}
+button.btn{display:inline-flex;align-items:center;justify-content:center;padding:8px 16px;border-radius:8px;cursor:pointer;font-size:13px;font-family:inherit;font-weight:700;letter-spacing:.03em;border:none;background:#f97316;color:#000;transition:opacity .15s}
+button.btn:hover{opacity:.8}
+button.btn-p{background:#f97316;color:#000;border:none;font-weight:700;font-size:14px}
+button.btn-p:hover{opacity:.8}
+button.btn-s{padding:5px 12px;font-size:12px}
+button.btn-outline{background:transparent;color:#f97316;border:2px solid #f97316;font-weight:700}
+button.btn-outline:hover{background:#f97316;color:#000}
+button.btn-danger{background:#ef4444;color:#fff;border:none;font-weight:700}
+button.btn-danger:hover{opacity:.8}
+button.btn-warn{background:#eab308;color:#000;border:none;font-weight:700}
+button.btn-warn:hover{opacity:.8}
+button.btn-ghost{background:transparent;border:2px solid #888;color:#ddd;cursor:pointer;font-size:13px;font-family:inherit;padding:6px 14px;border-radius:8px;font-weight:700}
+button.btn-ghost:hover{border-color:#f97316;color:#f97316}
+.tabs{display:flex;gap:6px;margin-bottom:1.5rem;flex-wrap:wrap}
+.tab{padding:9px 18px;border-radius:8px;cursor:pointer;font-size:12px;font-weight:700;font-family:inherit;letter-spacing:.06em;text-transform:uppercase;border:none;background:#f97316;color:#000;opacity:.35;transition:opacity .15s}
+.tab:hover{opacity:.65}
+.tab.active{opacity:1}
+.g2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.g3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.g4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.metric{background:#242424;border:1px solid #2e2e2e;border-radius:8px;padding:1rem;text-align:center}
+.mv{font-size:24px;font-weight:700;color:#f0f0f0}
+.mv-acc{color:#f97316}
+.ml{font-size:11px;color:#888;margin-top:3px;text-transform:uppercase;letter-spacing:.04em}
+.badge{display:inline-block;font-size:11px;padding:3px 9px;border-radius:4px;font-weight:700}
+.bg{background:#0a1f10;color:#22c55e;border:1px solid #15532e}
+.ba{background:#1a1500;color:#eab308;border:1px solid #713f12}
+.bb{background:#0a0f1f;color:#3b82f6;border:1px solid #1e3a8a}
+.br{background:#1f0a0a;color:#ef4444;border:1px solid #7f1d1d}
+.bo{background:#1f1008;color:#f97316;border:1px solid #7c3a0e}
+input,select,textarea{font-size:13px;padding:8px 11px;border:1px solid #3a3a3a;border-radius:8px;background:#242424;color:#f0f0f0;width:100%;font-family:inherit;outline:none;transition:border-color .15s}
+input:focus,select:focus,textarea:focus{border-color:#f97316}
+select option{background:#242424;color:#f0f0f0}
+.row{display:flex;align-items:center;gap:8px}
+.f1{flex:1}
+h2{font-size:15px;font-weight:700;margin-bottom:1rem;color:#f0f0f0;text-transform:uppercase;letter-spacing:.06em}
+h3{font-size:11px;font-weight:700;margin-bottom:6px;color:#888;text-transform:uppercase;letter-spacing:.08em}
+p{font-size:12px;color:#888}
+label{font-size:11px;color:#888;display:block;margin-bottom:4px;margin-top:10px;text-transform:uppercase;letter-spacing:.04em;font-weight:700}
+.sep{height:1px;background:#2e2e2e;margin:1rem 0}
+.arow{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #2e2e2e;flex-wrap:wrap}
+.arow:last-child{border-bottom:none}
+.av{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;border:1px solid #3a3a3a}
+.av0{background:#1e3a5f;color:#60a5fa}.av1{background:#14532d;color:#4ade80}
+.av2{background:#78350f;color:#fbbf24}.av3{background:#7f1d1d;color:#f87171}.av4{background:#1f1008;color:#f97316}
+.erow{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid #2e2e2e}
+.erow:last-child{border-bottom:none}
+.emo-btn{font-size:13px;background:#242424;border:2px solid #3a3a3a;border-radius:8px;padding:8px 13px;cursor:pointer;color:#888;font-family:inherit;font-weight:600;transition:all .15s}
+.emo-btn:hover{color:#f97316;border-color:#f97316}
+.emo-btn.sel{border-color:#f97316;color:#f97316;background:#1f1008;font-weight:700}
+.rot-pill{display:inline-flex;font-size:11px;padding:3px 9px;border-radius:4px;border:1px solid #3a3a3a;color:#888;margin:2px;font-weight:600}
+.rot-pill.activa{background:#1f1008;color:#f97316;border-color:#7c3a0e;font-weight:700}
+.alerta-row{padding:11px 14px;border-radius:8px;background:#1a1500;border:1px solid #713f12;margin-bottom:8px;display:flex;align-items:center;gap:10px}
+.err{font-size:12px;color:#ef4444;margin-top:6px;min-height:16px}
+.ok-msg{font-size:12px;color:#22c55e;margin-top:6px;min-height:16px}
+.topbar{display:flex;align-items:center;gap:10px;padding:10px 0 14px;border-bottom:1px solid #2e2e2e;margin-bottom:1.25rem}
+.user-chip{display:flex;align-items:center;gap:8px;background:#242424;border:1px solid #3a3a3a;border-radius:8px;padding:6px 12px;font-size:13px;font-weight:600}
+.logo{font-size:18px;font-weight:800;letter-spacing:-.02em;color:#f0f0f0}
+.logo span{color:#f97316}
+.ej-bloque{border:1px solid #2e2e2e;border-radius:12px;margin-bottom:12px;overflow:hidden}
+.ej-header{background:#242424;padding:11px 14px;display:flex;align-items:center;gap:10px;border-bottom:1px solid #2e2e2e}
+.ej-nombre{font-size:13px;font-weight:700;color:#f0f0f0;flex:1;text-transform:uppercase;letter-spacing:.04em}
+.ej-meta{font-size:11px;color:#888}
+.serie-row{display:flex;align-items:center;gap:8px;padding:9px 14px;border-bottom:1px solid #2e2e2e}
+.serie-row:last-of-type{border-bottom:none}
+.serie-num{width:22px;font-size:12px;font-weight:700;color:#f97316;flex-shrink:0;text-align:center}
+.serie-lbl{font-size:11px;color:#555;width:28px;flex-shrink:0;text-transform:uppercase}
+.serie-input{width:66px!important;text-align:center;padding:6px!important;font-size:14px;font-weight:700}
+.serie-status{width:24px;height:24px;border-radius:50%;border:2px solid #3a3a3a;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:#242424;transition:all .15s}
+.serie-status:hover{border-color:#f97316}
+.serie-status.done{background:#f97316;border-color:#f97316}
+.serie-status.done::after{content:'';display:block;width:9px;height:9px;border-radius:50%;background:#000}
+.ultimo-ref{font-size:11px;color:#555;padding:6px 14px 9px;font-style:italic;background:#0f0f0f}
+.prog-bar-bg{height:5px;background:#242424;border-radius:3px;margin-top:5px;overflow:hidden}
+.prog-bar{height:5px;border-radius:3px;background:#f97316}
+.sesion-card{background:#0f0f0f;border:1px solid #2e2e2e;border-radius:8px;margin-bottom:10px;overflow:hidden}
+.sesion-header{background:#242424;padding:10px 14px;display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none}
+.sesion-header:hover{background:#2e2e2e}
+.sesion-fecha{font-size:13px;font-weight:700;color:#f97316;text-transform:uppercase;letter-spacing:.03em;flex:1}
+.sesion-enc{font-size:11px;color:#888}
+.sesion-body{padding:14px;border-top:1px solid #2e2e2e}
+.ej-det{margin-bottom:14px}
+.ej-det:last-child{margin-bottom:0}
+.ej-det-nombre{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;color:#f0f0f0}
+.series-grid{display:flex;gap:6px;flex-wrap:wrap}
+.serie-chip{background:#242424;border:1px solid #3a3a3a;border-radius:8px;padding:7px 12px;text-align:center;min-width:68px}
+.serie-chip.done-chip{border-color:#7c3a0e;background:#1f1008}
+.serie-chip-num{font-size:10px;color:#888;text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px}
+.serie-chip-kg{font-size:15px;font-weight:700;color:#f0f0f0}
+.serie-chip.done-chip .serie-chip-kg{color:#f97316}
+.serie-chip-reps{font-size:10px;color:#888;margin-top:1px}
+.record-banner{background:#1f1008;border:1px solid #7c3a0e;border-radius:8px;padding:8px 14px;display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.loading-screen{position:fixed;inset:0;background:#0f0f0f;display:flex;align-items:center;justify-content:center;z-index:999;flex-direction:column;gap:16px}
+.spinner{width:32px;height:32px;border:3px solid #2e2e2e;border-top-color:#f97316;border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:1rem}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- LOADING -->
+<div id="loading-screen" class="loading-screen">
+  <div class="logo" style="font-size:32px">GYM<span>PRO</span></div>
+  <div class="spinner"></div>
+  <p>Cargando...</p>
+</div>
+
+<!-- LOGIN -->
+<div id="screen-login" class="hidden">
+  <div class="login-wrap">
+    <div style="width:100%;max-width:400px">
+      <div style="text-align:center;margin-bottom:2rem">
+        <div class="logo" style="font-size:36px">GYM<span>PRO</span></div>
+        <p style="margin-top:8px;font-size:14px;color:#888">Sistema de entrenamiento</p>
+      </div>
+
+      <!-- LOGIN NORMAL -->
+      <div class="card" id="form-login">
+        <h2 style="text-align:center;margin-bottom:1.5rem;font-size:16px">Ingresar</h2>
+        <label>Email</label>
+        <input id="login-email" type="email" placeholder="tu@email.com" onkeydown="if(event.key==='Enter')doLogin()"/>
+        <label>Contraseña</label>
+        <input id="login-pass" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"/>
+        <div class="err" id="login-err"></div>
+        <button class="btn btn-p" id="btn-login" style="width:100%;margin-top:16px;padding:13px;font-size:15px" onclick="doLogin()">INGRESAR</button>
+        <div style="text-align:center;margin-top:16px">
+          <button onclick="mostrarRecupero()" style="background:none;border:none;color:#888;font-size:12px;cursor:pointer;font-family:inherit;text-decoration:underline">Olvidé mi contraseña</button>
+        </div>
+      </div>
+
+      <!-- RECUPERO -->
+      <div class="card hidden" id="form-recupero">
+        <h2 style="text-align:center;margin-bottom:.5rem">Recuperar contraseña</h2>
+        <p style="text-align:center;margin-bottom:1.25rem;font-size:13px">Te mandamos un mail para resetearla</p>
+        <label>Tu email</label>
+        <input id="recupero-email" type="email" placeholder="tu@email.com"/>
+        <div class="err" id="recupero-err"></div>
+        <div class="ok-msg hidden" id="recupero-ok">✓ Mail enviado. Revisá tu bandeja de entrada.</div>
+        <button class="btn btn-p" style="width:100%;margin-top:16px;padding:12px" onclick="doRecupero()">ENVIAR MAIL</button>
+        <div style="text-align:center;margin-top:14px">
+          <button onclick="mostrarLogin()" style="background:none;border:none;color:#888;font-size:12px;cursor:pointer;font-family:inherit;text-decoration:underline">← Volver al login</button>
+        </div>
+      </div>
+
+      <!-- NUEVA CONTRASEÑA (viene del link del mail) -->
+      <div class="card hidden" id="form-nueva-pass">
+        <h2 style="text-align:center;margin-bottom:.5rem">Nueva contraseña</h2>
+        <p style="text-align:center;margin-bottom:1.25rem;font-size:13px">Elegí tu nueva contraseña</p>
+        <label>Nueva contraseña</label>
+        <input id="nueva-pass-1" type="password" placeholder="Mínimo 6 caracteres"/>
+        <label>Repetir contraseña</label>
+        <input id="nueva-pass-2" type="password" placeholder="Repetir contraseña"/>
+        <div class="err" id="nueva-pass-err"></div>
+        <button class="btn btn-p" style="width:100%;margin-top:16px;padding:12px" onclick="doNuevaPass()">GUARDAR CONTRASEÑA</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- APP PRINCIPAL -->
+<div id="screen-app" class="hidden">
+  <div class="topbar">
+    <div class="f1"><div class="logo">GYM<span>PRO</span></div></div>
+    <div class="user-chip">
+      <div class="av av0" id="tb-av" style="width:28px;height:28px;font-size:11px"></div>
+      <span id="tb-nombre"></span>
+      <span class="badge bo" id="tb-rol"></span>
+    </div>
+    <button class="btn-ghost" onclick="doLogout()">Salir</button>
+  </div>
+
+  <div class="tabs hidden" id="tabs-profe">
+    <button class="tab active" onclick="swP('dashboard')">Dashboard</button>
+    <button class="tab" onclick="swP('alumnos')">Alumnos</button>
+    <button class="tab" onclick="swP('cats')">Categorias</button>
+    <button class="tab" onclick="swP('resumen')">Resumen</button>
+  </div>
+  <div class="tabs hidden" id="tabs-alumno">
+    <button class="tab active" onclick="swA('entrenar')">Entrenar</button>
+    <button class="tab" onclick="swA('historial')">Mi historial</button>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div id="vp-dashboard" class="hidden">
+    <div class="g4" style="margin-bottom:1rem">
+      <div class="metric"><div class="mv mv-acc" id="m-alumnos">0</div><div class="ml">Alumnos</div></div>
+      <div class="metric"><div class="mv" id="m-cats">0</div><div class="ml">Categorias</div></div>
+      <div class="metric"><div class="mv" id="m-sesiones">0</div><div class="ml">Sesiones</div></div>
+      <div class="metric"><div class="mv" id="m-alertas" style="color:#eab308">0</div><div class="ml">Cambios pendientes</div></div>
+    </div>
+    <div id="panel-alertas"></div>
+    <div class="card"><h2>Alumnos activos</h2><div id="lista-alumnos"><p>Cargando...</p></div></div>
+    <div class="card hidden" id="card-detalle">
+      <div class="row" style="margin-bottom:1.25rem">
+        <div class="f1">
+          <div style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:.05em" id="d-nombre"></div>
+          <div style="font-size:12px;color:#888;margin-top:2px" id="d-sub"></div>
+        </div>
+        <button class="btn btn-outline btn-s" onclick="cerrarDetalle()">Cerrar</button>
+      </div>
+      <div class="g3" style="margin-bottom:1.25rem">
+        <div class="metric"><div class="mv mv-acc" id="d-sesiones">0</div><div class="ml">Sesiones totales</div></div>
+        <div class="metric"><div class="mv" id="d-rutact" style="font-size:13px"></div><div class="ml">Rutina actual</div></div>
+        <div class="metric"><div class="mv" id="d-dias" style="color:#eab308">0</div><div class="ml">Dias para cambio</div></div>
+      </div>
+      <h3 style="margin-bottom:8px">Rotacion del ciclo</h3>
+      <div id="d-rotacion" style="margin-bottom:1.25rem"></div>
+      <h3 style="margin-bottom:8px">Records personales</h3>
+      <div id="d-records" style="margin-bottom:1.25rem"></div>
+      <h3 style="margin-bottom:8px">Progreso por ejercicio</h3>
+      <div id="d-progreso" style="margin-bottom:1.25rem"></div>
+      <div class="row" style="margin-bottom:12px">
+        <h3 style="margin:0;flex:1">Sesiones registradas</h3>
+        <span style="font-size:11px;color:#888" id="d-total-ses-lbl"></span>
+      </div>
+      <div id="d-sesiones-lista"></div>
+    </div>
+  </div>
+
+  <!-- ALUMNOS -->
+  <div id="vp-alumnos" class="hidden">
+    <div class="card">
+      <h2>Alumnos registrados</h2>
+      <div id="lista-usuarios-panel"><p>Cargando...</p></div>
+      <div class="sep"></div>
+      <h3 style="margin-bottom:8px">Agregar nuevo alumno</h3>
+      <p style="margin-bottom:12px">El alumno va a recibir un mail para activar su cuenta y elegir su contraseña.</p>
+      <div class="g2">
+        <div><label>Nombre completo</label><input id="nu-nombre" placeholder="Ej: Valentina Torres"/></div>
+        <div><label>Email del alumno</label><input id="nu-email" type="email" placeholder="alumno@email.com"/></div>
+      </div>
+      <div style="margin-top:8px"><label>Categoria de entrenamiento</label><select id="nu-cat"></select></div>
+      <div class="err" id="nu-err"></div>
+      <div class="ok-msg hidden" id="nu-ok">✓ Alumno creado. Se le envió el mail de activación.</div>
+      <div style="margin-top:14px"><button class="btn btn-p" onclick="crearAlumno()">+ Agregar alumno</button></div>
+    </div>
+  </div>
+
+  <!-- CATEGORIAS -->
+  <div id="vp-cats" class="hidden">
+    <div class="card">
+      <div class="row" style="margin-bottom:1rem">
+        <h2 style="flex:1;margin:0">Categorias y rutinas</h2>
+        <button class="btn btn-p btn-s" onclick="showFormCat()">+ Categoria</button>
+      </div>
+      <p style="margin-bottom:1rem">Hasta 4 rutinas por categoria. Rotacion automatica A→B→C→D cada 6 semanas.</p>
+      <div id="lista-cats"><p>Cargando...</p></div>
+    </div>
+    <div class="card hidden" id="form-cat-card">
+      <h2>Nueva categoria</h2>
+      <label>Nombre</label><input id="fc-nombre" placeholder="Ej: Fuerza general"/>
+      <label>Descripcion</label><input id="fc-desc" placeholder="Ej: Enfocada en patrones de fuerza"/>
+      <div style="margin-top:14px;display:flex;gap:8px">
+        <button class="btn btn-p" onclick="guardarCat()">Crear categoria</button>
+        <button class="btn btn-outline" onclick="hideForms()">Cancelar</button>
+      </div>
+    </div>
+    <div class="card hidden" id="form-rut-card">
+      <h2 id="fr-titulo">Nueva rutina</h2>
+      <p style="margin-bottom:8px;color:#f97316;font-weight:700" id="fr-cat-label"></p>
+      <label>Nombre de la rutina</label><input id="fr-nombre" placeholder="Ej: Fuerza A"/>
+      <label>Ejercicios — una linea: Nombre, Series x Reps</label>
+      <textarea id="fr-ejercicios" rows="7" placeholder="Press banca, 4x8&#10;Sentadilla, 4x10&#10;Peso muerto, 3x6&#10;Press militar, 3x10&#10;Dominadas, 3x8" style="resize:vertical"></textarea>
+      <div style="margin-top:14px;display:flex;gap:8px">
+        <button class="btn btn-p" onclick="guardarRutina()">Guardar rutina</button>
+        <button class="btn btn-outline" onclick="hideForms()">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- RESUMEN -->
+  <div id="vp-resumen" class="hidden">
+    <div class="g2" style="margin-bottom:1rem">
+      <div class="metric"><div class="mv mv-acc" id="rs-sesiones">0</div><div class="ml">Sesiones esta semana</div></div>
+      <div class="metric"><div class="mv" id="rs-activos">0</div><div class="ml">Alumnos que entrenaron</div></div>
+    </div>
+    <div class="card"><h2>Actividad semanal</h2><div id="tabla-resumen"></div></div>
+    <div class="card"><h2>Alertas de bienestar</h2><div id="alertas-bienestar"></div></div>
+  </div>
+
+  <!-- ALUMNO: ENTRENAR -->
+  <div id="va-entrenar" class="hidden">
+    <div id="paso-encuesta">
+      <div class="card">
+        <div class="row" style="margin-bottom:1rem">
+          <div class="f1">
+            <div style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:.04em" id="al-nombre2"></div>
+            <div style="font-size:12px;color:#888;margin-top:2px" id="al-rutlabel"></div>
+          </div>
+          <span class="badge bo" id="al-sem-badge"></span>
+        </div>
+        <div style="margin-bottom:1.25rem">
+          <div style="display:flex;justify-content:space-between;font-size:11px;color:#888;margin-bottom:4px">
+            <span>Progreso del ciclo</span><span id="al-prog-txt"></span>
+          </div>
+          <div class="prog-bar-bg"><div class="prog-bar" id="al-prog-bar" style="width:0%"></div></div>
+        </div>
+        <h2 style="margin-bottom:1rem">Como llego hoy</h2>
+        <h3 style="margin-bottom:8px">Nivel de energia</h3>
+        <div class="row" style="gap:6px;flex-wrap:wrap;margin-bottom:1.25rem">
+          <button class="emo-btn" onclick="selEnc('energia',1,this)">1 — Bajo</button>
+          <button class="emo-btn" onclick="selEnc('energia',2,this)">2</button>
+          <button class="emo-btn" onclick="selEnc('energia',3,this)">3 — Normal</button>
+          <button class="emo-btn" onclick="selEnc('energia',4,this)">4</button>
+          <button class="emo-btn" onclick="selEnc('energia',5,this)">5 — Excelente</button>
+        </div>
+        <h3 style="margin-bottom:8px">Calidad del sueno</h3>
+        <div class="row" style="gap:6px;flex-wrap:wrap;margin-bottom:1.25rem">
+          <button class="emo-btn" onclick="selEnc('sueno',1,this)">Mal</button>
+          <button class="emo-btn" onclick="selEnc('sueno',2,this)">Regular</button>
+          <button class="emo-btn" onclick="selEnc('sueno',3,this)">Bien</button>
+          <button class="emo-btn" onclick="selEnc('sueno',4,this)">Muy bien</button>
+        </div>
+        <h3 style="margin-bottom:8px">Dolor o molestia</h3>
+        <div class="row" style="gap:6px;flex-wrap:wrap;margin-bottom:1.5rem">
+          <button class="emo-btn" onclick="selEnc('dolor','ninguno',this)">Sin dolor</button>
+          <button class="emo-btn" onclick="selEnc('dolor','leve',this)">Leve</button>
+          <button class="emo-btn" onclick="selEnc('dolor','hombro',this)">Hombro</button>
+          <button class="emo-btn" onclick="selEnc('dolor','rodilla',this)">Rodilla</button>
+          <button class="emo-btn" onclick="selEnc('dolor','lumbar',this)">Lumbar</button>
+          <button class="emo-btn" onclick="selEnc('dolor','otro',this)">Otro</button>
+        </div>
+        <button class="btn btn-p" style="width:100%;padding:12px;font-size:14px" onclick="iniciarEntrenamiento()">EMPEZAR ENTRENAMIENTO</button>
+      </div>
+    </div>
+    <div id="paso-entrena" class="hidden">
+      <div class="card">
+        <div class="row" style="margin-bottom:.75rem">
+          <div class="f1">
+            <div style="font-size:15px;font-weight:700;text-transform:uppercase;letter-spacing:.04em" id="al-nombre3"></div>
+            <div style="font-size:12px;color:#888" id="al-rut3"></div>
+          </div>
+          <div id="al-enc-resumen" style="font-size:11px;color:#888;text-align:right;line-height:1.7;max-width:150px"></div>
+        </div>
+        <p style="margin-bottom:1rem;color:#555">Carga el peso de cada serie y tildala cuando la termines.</p>
+        <div id="ejs-hoy"></div>
+        <label style="margin-top:1rem">Nota de la sesion</label>
+        <textarea id="nota-sesion" rows="2" placeholder="Opcional..." style="resize:none"></textarea>
+        <button class="btn btn-p" style="width:100%;margin-top:12px;padding:11px" onclick="guardarSesion()">GUARDAR SESION</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ALUMNO: HISTORIAL -->
+  <div id="va-historial" class="hidden">
+    <div class="card"><h2>Records personales</h2><div id="al-records"></div></div>
+    <div class="card"><h2>Progreso por ejercicio</h2><div id="al-progreso-ej"></div></div>
+    <div class="card"><h2>Historial de sesiones</h2><div id="al-historial-full"></div></div>
+  </div>
+</div>
+</div>
+
+<script>
+// =============================================
+// CONFIG SUPABASE
+// =============================================
+const SUPA_URL = 'https://hhrjilpojlqvhxrqjoet.supabase.co';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhocmppbHBvamxxdmh4cnFqb2V0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc3ODExMDYsImV4cCI6MjA5MzM1NzEwNn0.UHbIWVDusgBKl5lq1f0-GPGcMAOD4wKK-geiD_FO9ec';
+const { createClient } = supabase;
+const db = createClient(SUPA_URL, SUPA_KEY);
+
+// =============================================
+// ESTADO
+// =============================================
+const SEMANAS = 6;
+const SUENO_LBL = ['','Mal','Regular','Bien','Muy bien'];
+let usuarioActual = null;
+let perfilActual  = null;
+let alumnoActual  = null;
+let encuesta = {energia:0, sueno:0, dolor:''};
+let catRutForm = null;
+let catsCache = [];
+let alumnosCache = [];
+
+// =============================================
+// HELPERS
+// =============================================
+function diasDesde(iso){return Math.floor((Date.now()-new Date(iso))/864e5);}
+function diasParaCambio(iso){return Math.max(0,SEMANAS*7-diasDesde(iso));}
+function semanaEnCiclo(iso){return Math.min(Math.floor(diasDesde(iso)/7)+1,SEMANAS);}
+function initials(n){return(n||'?').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();}
+function rutinaDeAlumno(a){
+  const cat=catsCache.find(c=>c.id===a.categoria_id);
+  if(!cat||!cat.rutinas.length) return null;
+  const idx=Math.floor(Math.floor(diasDesde(a.ciclo_inicio)/7)/SEMANAS)%cat.rutinas.length;
+  return{rutina:cat.rutinas[idx],cat,idx};
+}
+function calcRecords(sesiones){
+  const rec={};
+  sesiones.forEach(s=>(s.ejercicios||[]).forEach(e=>{
+    const mx=e.series.length?Math.max(...e.series.map(sr=>sr.kg||0)):0;
+    if(!rec[e.ej]||mx>rec[e.ej]) rec[e.ej]=mx;
+  }));
+  return rec;
+}
+function loading(v){document.getElementById('loading-screen').style.display=v?'flex':'none';}
+
+// =============================================
+// AUTH
+// =============================================
+db.auth.onAuthStateChange(async(event,session)=>{
+  if(event==='PASSWORD_RECOVERY'){
+    loading(false);
+    document.getElementById('screen-login').classList.remove('hidden');
+    document.getElementById('form-login').classList.add('hidden');
+    document.getElementById('form-recupero').classList.add('hidden');
+    document.getElementById('form-nueva-pass').classList.remove('hidden');
+    return;
+  }
+  if(event==='SIGNED_IN'&&session){
+    await setupSesion(session.user);
+    return;
+  }
+  if(event==='SIGNED_OUT'){
+    usuarioActual=null;perfilActual=null;alumnoActual=null;
+    loading(false);
+    document.getElementById('screen-app').classList.add('hidden');
+    document.getElementById('screen-login').classList.remove('hidden');
+    mostrarLogin();
+  }
+});
+
+async function doLogin(){
+  const email=document.getElementById('login-email').value.trim();
+  const pass=document.getElementById('login-pass').value;
+  const errEl=document.getElementById('login-err');
+  errEl.textContent='';
+  if(!email||!pass){errEl.textContent='Completá todos los campos.';return;}
+  const btn=document.getElementById('btn-login');
+  btn.textContent='Ingresando...';btn.disabled=true;
+  const{error}=await db.auth.signInWithPassword({email,password:pass});
+  btn.textContent='INGRESAR';btn.disabled=false;
+  if(error){errEl.textContent='Email o contraseña incorrectos.';return;}
+}
+
+async function doLogout(){
+  await db.auth.signOut();
+}
+
+function mostrarRecupero(){
+  document.getElementById('form-login').classList.add('hidden');
+  document.getElementById('form-recupero').classList.remove('hidden');
+  document.getElementById('form-nueva-pass').classList.add('hidden');
+}
+function mostrarLogin(){
+  document.getElementById('form-login').classList.remove('hidden');
+  document.getElementById('form-recupero').classList.add('hidden');
+  document.getElementById('form-nueva-pass').classList.add('hidden');
+}
+
+async function doRecupero(){
+  const email=document.getElementById('recupero-email').value.trim();
+  const errEl=document.getElementById('recupero-err');
+  const okEl=document.getElementById('recupero-ok');
+  errEl.textContent='';okEl.classList.add('hidden');
+  if(!email){errEl.textContent='Ingresá tu email.';return;}
+  const{error}=await db.auth.resetPasswordForEmail(email,{
+    redirectTo:window.location.origin+window.location.pathname
+  });
+  if(error){errEl.textContent='No se pudo enviar. Verificá el email.';return;}
+  okEl.classList.remove('hidden');
+}
+
+async function doNuevaPass(){
+  const p1=document.getElementById('nueva-pass-1').value;
+  const p2=document.getElementById('nueva-pass-2').value;
+  const errEl=document.getElementById('nueva-pass-err');
+  errEl.textContent='';
+  if(p1.length<6){errEl.textContent='La contraseña debe tener al menos 6 caracteres.';return;}
+  if(p1!==p2){errEl.textContent='Las contraseñas no coinciden.';return;}
+  const{error}=await db.auth.updateUser({password:p1});
+  if(error){errEl.textContent='Error al guardar. Intentá de nuevo.';return;}
+  alert('¡Contraseña actualizada! Ya podés ingresar.');
+  await db.auth.signOut();
+}
+
+// =============================================
+// SETUP SESION
+// =============================================
+async function setupSesion(user){
+  loading(true);
+  usuarioActual=user;
+  const{data:perfil}=await db.from('perfiles').select('*').eq('id',user.id).single();
+  perfilActual=perfil;
+  if(!perfil){
+    await db.auth.signOut();
+    loading(false);
+    document.getElementById('screen-login').classList.remove('hidden');
+    document.getElementById('login-err').textContent='Tu cuenta no está configurada todavía. Contactá al profe.';
+    return;
+  }
+  await cargarCategorias();
+  document.getElementById('tb-nombre').textContent=perfil.nombre;
+  document.getElementById('tb-rol').textContent=perfil.rol==='profe'?'PROFESOR':'ALUMNO';
+  document.getElementById('tb-av').textContent=initials(perfil.nombre);
+  document.getElementById('screen-login').classList.add('hidden');
+  document.getElementById('screen-app').classList.remove('hidden');
+  loading(false);
+  if(perfil.rol==='profe'){
+    document.getElementById('tabs-profe').classList.remove('hidden');
+    document.getElementById('tabs-alumno').classList.add('hidden');
+    hideAllViews();
+    swP('dashboard');
+  } else {
+    const{data:alum}=await db.from('alumnos').select('*').eq('perfil_id',user.id).single();
+    alumnoActual=alum;
+    document.getElementById('tabs-alumno').classList.remove('hidden');
+    document.getElementById('tabs-profe').classList.add('hidden');
+    hideAllViews();
+    swA('entrenar');
+  }
+}
+
+function hideAllViews(){
+  ['vp-dashboard','vp-alumnos','vp-cats','vp-resumen','va-entrenar','va-historial']
+    .forEach(id=>document.getElementById(id).classList.add('hidden'));
+}
+
+// =============================================
+// CARGA DE DATOS
+// =============================================
+async function cargarCategorias(){
+  const{data}=await db.from('categorias').select('*,rutinas(*)').order('id');
+  if(data) catsCache=data.map(c=>({...c,
+    rutinas:(c.rutinas||[]).sort((a,b)=>a.orden-b.orden)
+      .map(r=>({...r,ejercicios:r.ejercicios||[]}))
+  }));
+}
+
+async function cargarAlumnos(){
+  const{data}=await db.from('alumnos').select('*,perfiles(*),sesiones(*)').order('id');
+  if(data) alumnosCache=data.map(a=>({...a,
+    nombre:a.perfiles?.nombre||'Alumno',
+    sesiones:(a.sesiones||[]).sort((x,y)=>new Date(x.fecha)-new Date(y.fecha))
+  }));
+}
+
+// =============================================
+// NAVEGACION
+// =============================================
+function swP(v){
+  ['dashboard','alumnos','cats','resumen'].forEach((x,i)=>{
+    document.getElementById('vp-'+x).classList.toggle('hidden',x!==v);
+    document.querySelectorAll('#tabs-profe .tab')[i]?.classList.toggle('active',x===v);
+  });
+  if(v==='dashboard') renderDashboard();
+  if(v==='alumnos')   renderAlumnos();
+  if(v==='cats')      renderCats();
+  if(v==='resumen')   renderResumen();
+}
+function swA(v){
+  ['entrenar','historial'].forEach((x,i)=>{
+    document.getElementById('va-'+x).classList.toggle('hidden',x!==v);
+    document.querySelectorAll('#tabs-alumno .tab')[i]?.classList.toggle('active',x===v);
+  });
+  if(v==='entrenar')  setupVistaAlumno();
+  if(v==='historial') renderHistorialAlumno();
+}
+
+// =============================================
+// DASHBOARD PROFE
+// =============================================
+async function renderDashboard(){
+  document.getElementById('lista-alumnos').innerHTML='<p>Cargando...</p>';
+  await cargarAlumnos();
+  const total=alumnosCache.reduce((s,a)=>s+a.sesiones.length,0);
+  const alertas=alumnosCache.filter(a=>diasParaCambio(a.ciclo_inicio)===0);
+  document.getElementById('m-alumnos').textContent=alumnosCache.length;
+  document.getElementById('m-cats').textContent=catsCache.length;
+  document.getElementById('m-sesiones').textContent=total;
+  document.getElementById('m-alertas').textContent=alertas.length;
+  document.getElementById('panel-alertas').innerHTML=alertas.map(a=>`
+    <div class="alerta-row">
+      <div class="f1"><span style="font-size:13px;font-weight:700">${a.nombre}</span>
+      <span style="font-size:12px;color:#eab308;margin-left:8px">Ciclo de 6 semanas completado</span></div>
+      <button class="btn btn-warn btn-s" onclick="rotarCiclo(${a.id})">Reiniciar ciclo</button>
+    </div>`).join('');
+  if(!alumnosCache.length){
+    document.getElementById('lista-alumnos').innerHTML='<p>No hay alumnos registrados aún. Agregá alumnos en la sección Alumnos.</p>';
+    return;
+  }
+  document.getElementById('lista-alumnos').innerHTML=alumnosCache.map(a=>{
+    const info=rutinaDeAlumno(a);
+    const cat=catsCache.find(c=>c.id===a.categoria_id);
+    const dias=diasParaCambio(a.ciclo_inicio);
+    const sem=semanaEnCiclo(a.ciclo_inicio);
+    const bc=dias===0?'br':sem>=5?'ba':'bg';
+    const bt=dias===0?'CAMBIAR YA':`SEM ${sem}/6`;
+    return `<div class="arow">
+      <div class="av av${a.id%5}">${initials(a.nombre)}</div>
+      <div class="f1">
+        <div style="font-size:13px;font-weight:600">${a.nombre}</div>
+        <div style="font-size:11px;color:#888">${cat?cat.nombre:'Sin categoria'} · ${info?info.rutina.nombre:'Sin rutina'} · ${a.sesiones.length} sesiones</div>
+      </div>
+      <span class="badge ${bc}">${bt}</span>
+      <button class="btn btn-s" style="margin-left:6px" onclick="verDetalle(${a.id})">Ver alumno</button>
+    </div>`;
+  }).join('');
+}
+
+async function rotarCiclo(id){
+  await db.from('alumnos').update({ciclo_inicio:new Date().toISOString()}).eq('id',id);
+  renderDashboard();
+}
+
+async function verDetalle(id){
+  const a=alumnosCache.find(x=>x.id===id);if(!a) return;
+  const info=rutinaDeAlumno(a);
+  document.getElementById('card-detalle').classList.remove('hidden');
+  document.getElementById('d-nombre').textContent=a.nombre;
+  document.getElementById('d-sub').textContent=info?`${info.cat.nombre} · ${info.rutina.nombre}`:'Sin categoria';
+  document.getElementById('d-sesiones').textContent=a.sesiones.length;
+  document.getElementById('d-rutact').textContent=info?info.rutina.nombre:'—';
+  document.getElementById('d-dias').textContent=diasParaCambio(a.ciclo_inicio);
+  document.getElementById('d-total-ses-lbl').textContent=`${a.sesiones.length} sesion${a.sesiones.length!==1?'es':''}`;
+  if(info) document.getElementById('d-rotacion').innerHTML=
+    info.cat.rutinas.map((r,i)=>`<span class="rot-pill${i===info.idx?' activa':''}">${r.nombre}</span>`).join(' → ');
+
+  const sData=a.sesiones.map(s=>({...s,ejercicios:s.ejercicios||[],enc:s.encuesta||{}}));
+  const rec=calcRecords(sData);
+  document.getElementById('d-records').innerHTML=Object.keys(rec).length
+    ?Object.entries(rec).map(([ej,kg])=>`<div class="record-banner"><div class="f1"><span style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:#f0f0f0">${ej}</span></div><span style="font-size:16px;font-weight:800;color:#f97316">${kg} kg</span><span style="font-size:10px;color:#7c3a0e;margin-left:6px;font-weight:700">RECORD</span></div>`).join('')
+    :'<p>Sin datos aun.</p>';
+
+  const ejMap={};
+  sData.forEach(s=>s.ejercicios.forEach(e=>{
+    if(!ejMap[e.ej])ejMap[e.ej]=[];
+    if(e.series.length) ejMap[e.ej].push(Math.max(...e.series.map(sr=>sr.kg||0)));
+  }));
+  document.getElementById('d-progreso').innerHTML=Object.entries(ejMap).map(([ej,kgs])=>{
+    const pct=kgs.length>1?Math.round(((kgs[kgs.length-1]-kgs[0])/kgs[0])*100):0;
+    const col=pct>0?'#22c55e':pct<0?'#ef4444':'#888';
+    return `<div class="erow"><div class="f1"><div style="font-size:12px;font-weight:700">${ej}</div><div style="font-size:11px;color:#888">${kgs.map(k=>k+'kg').join(' → ')}</div></div><span style="font-size:13px;font-weight:700;color:${col}">${pct>0?'+':''}${pct}%</span></div>`;
+  }).join('')||'<p>Sin datos aun.</p>';
+
+  const sesDiv=document.getElementById('d-sesiones-lista');
+  if(!sData.length){sesDiv.innerHTML='<p>Sin sesiones aun.</p>';return;}
+  sesDiv.innerHTML=[...sData].reverse().map(s=>{
+    const fecha=new Date(s.fecha).toLocaleDateString('es-AR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+    const encInfo=s.enc?`Energia ${s.enc.energia||'?'}/5 · Sueno: ${SUENO_LBL[s.enc.sueno]||'—'} · Dolor: ${s.enc.dolor||'—'}`:'';
+    const ejsHtml=s.ejercicios.map(e=>{
+      const kgs=e.series.map(sr=>sr.kg||0);
+      const bajoCarga=kgs.length>1&&Math.max(...kgs)!==Math.min(...kgs);
+      const chips=e.series.map((sr,i)=>`<div class="serie-chip ${sr.done?'done-chip':''}"><div class="serie-chip-num">S${i+1}</div><div class="serie-chip-kg">${sr.kg||0}<span style="font-size:9px;font-weight:400;color:#888">kg</span></div><div class="serie-chip-reps">${sr.r} reps</div></div>`).join('');
+      return `<div class="ej-det"><div class="ej-det-nombre">${e.ej}${bajoCarga?` <span style="font-size:10px;color:#eab308;font-weight:700">— BAJO CARGA</span>`:''}</div><div class="series-grid">${chips}</div></div>`;
+    }).join('');
+    return `<div class="sesion-card"><div class="sesion-header" onclick="toggleSesion(this)"><div class="sesion-fecha">${fecha}</div><div class="sesion-enc">${encInfo}</div><span style="font-size:20px;color:#f97316;margin-left:8px;font-weight:700" class="toggle-ico">+</span></div><div class="sesion-body hidden">${ejsHtml}${s.nota?`<div style="margin-top:12px;padding:8px 12px;background:#242424;border-radius:8px;border:1px solid #2e2e2e;font-size:12px;color:#888;font-style:italic">"${s.nota}"</div>`:''}</div></div>`;
+  }).join('');
+}
+function toggleSesion(h){const b=h.nextElementSibling;const i=h.querySelector('.toggle-ico');b.classList.toggle('hidden');i.textContent=b.classList.contains('hidden')?'+':'−';}
+function cerrarDetalle(){document.getElementById('card-detalle').classList.add('hidden');}
+
+// =============================================
+// GESTION ALUMNOS
+// =============================================
+async function renderAlumnos(){
+  document.getElementById('lista-usuarios-panel').innerHTML='<p>Cargando...</p>';
+  await cargarAlumnos();
+  document.getElementById('nu-cat').innerHTML=catsCache.map(c=>`<option value="${c.id}">${c.nombre}</option>`).join('');
+  if(!alumnosCache.length){
+    document.getElementById('lista-usuarios-panel').innerHTML='<p>No hay alumnos registrados aún.</p>';
+    return;
+  }
+  document.getElementById('lista-usuarios-panel').innerHTML=alumnosCache.map(a=>{
+    const cat=catsCache.find(c=>c.id===a.categoria_id);
+    return `<div class="arow">
+      <div class="av av${a.id%5}">${initials(a.nombre)}</div>
+      <div class="f1">
+        <div style="font-size:13px;font-weight:600">${a.nombre}</div>
+        <div style="font-size:11px;color:#888">${cat?cat.nombre:'Sin categoria'} · ${a.sesiones.length} sesiones</div>
+      </div>
+      <span class="badge bb">ALUMNO</span>
+      <button class="btn btn-danger btn-s" onclick="eliminarAlumno(${a.id},'${a.perfil_id}')" style="margin-left:6px">Eliminar</button>
+    </div>`;
+  }).join('');
+}
+
+async function crearAlumno(){
+  const nombre=document.getElementById('nu-nombre').value.trim();
+  const email=document.getElementById('nu-email').value.trim().toLowerCase();
+  const catId=parseInt(document.getElementById('nu-cat').value);
+  const errEl=document.getElementById('nu-err');
+  const okEl=document.getElementById('nu-ok');
+  errEl.textContent='';okEl.classList.add('hidden');
+  if(!nombre||!email){errEl.textContent='Completá todos los campos.';return;}
+  if(!email.includes('@')){errEl.textContent='Ingresá un email válido.';return;}
+  if(isNaN(catId)){errEl.textContent='Seleccioná una categoria.';return;}
+
+  // Verificar si el alumno ya existe en la app
+  const{data:perfilExistente}=await db.from('perfiles')
+    .select('id').eq('id',
+      (await db.from('perfiles').select('id').limit(1)).data?.[0]?.id||'x'
+    ).limit(1);
+
+  // Crear usuario en Supabase Auth
+  const passTemp='Gym'+Math.random().toString(36).slice(2,8)+'!1';
+  const{data:authData,error:authErr}=await db.auth.signUp({
+    email, password:passTemp,
+    options:{emailRedirectTo:window.location.origin+window.location.pathname}
+  });
+
+  let userId=authData?.user?.id;
+
+  // Si el email ya estaba registrado, Supabase devuelve un usuario igual
+  // pero sin confirmar — igual podemos usar el id
+  if(authErr && !authErr.message.includes('already registered')){
+    errEl.textContent='Error: '+authErr.message;return;
+  }
+
+  if(!userId){
+    errEl.textContent='No se pudo obtener el ID del usuario. Intentá de nuevo.';return;
+  }
+
+  // Verificar si ya tiene perfil
+  const{data:perfilYaExiste}=await db.from('perfiles').select('id').eq('id',userId).single();
+
+  if(perfilYaExiste){
+    errEl.textContent='Este email ya está registrado como alumno en la app.';return;
+  }
+
+  // Crear perfil y alumno
+  const{error:errPerfil}=await db.from('perfiles').insert({id:userId,nombre,rol:'alumno'});
+  if(errPerfil){errEl.textContent='Error creando perfil: '+errPerfil.message;return;}
+
+  const{error:errAlumno}=await db.from('alumnos').insert({
+    perfil_id:userId,categoria_id:catId,ciclo_inicio:new Date().toISOString()
+  });
+  if(errAlumno){errEl.textContent='Error creando alumno: '+errAlumno.message;return;}
+
+  document.getElementById('nu-nombre').value='';
+  document.getElementById('nu-email').value='';
+  okEl.classList.remove('hidden');
+  setTimeout(()=>okEl.classList.add('hidden'),5000);
+  renderAlumnos();
+}
+
+async function eliminarAlumno(id,perfilId){
+  if(!confirm('¿Eliminar este alumno y todas sus sesiones?')) return;
+  await db.from('sesiones').delete().eq('alumno_id',id);
+  await db.from('alumnos').delete().eq('id',id);
+  if(perfilId) await db.from('perfiles').delete().eq('id',perfilId);
+  renderAlumnos();
+}
+
+// =============================================
+// CATEGORIAS Y RUTINAS
+// =============================================
+async function renderCats(){
+  document.getElementById('lista-cats').innerHTML='<p>Cargando...</p>';
+  await cargarCategorias();
+  if(!catsCache.length){
+    document.getElementById('lista-cats').innerHTML='<p>No hay categorias aún. Creá la primera.</p>';
+    return;
+  }
+  document.getElementById('lista-cats').innerHTML=catsCache.map(c=>`
+    <div class="card-inner">
+      <div class="row" style="margin-bottom:8px">
+        <div class="f1">
+          <div style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.04em">${c.nombre}</div>
+          <div style="font-size:11px;color:#888">${c.descripcion||''}</div>
+        </div>
+        <span class="badge bb">${c.rutinas.length}/4</span>
+        ${c.rutinas.length<4?`<button class="btn btn-p btn-s" onclick="showFormRut(${c.id})" style="margin-left:6px">+ Rutina</button>`:''}
+      </div>
+      <div style="margin-bottom:10px">${c.rutinas.map(r=>`<span class="rot-pill">${r.nombre}</span>`).join(' → ')}</div>
+      ${c.rutinas.map(r=>`<div style="background:#0f0f0f;border:1px solid #2e2e2e;border-radius:8px;padding:8px 10px;margin-top:6px"><div style="font-size:12px;font-weight:700;color:#f97316;margin-bottom:3px">${r.nombre}</div><div style="font-size:11px;color:#888">${r.ejercicios.map(e=>`${e.n} (${e.s}x${e.r})`).join(' · ')}</div></div>`).join('')}
+    </div>`).join('');
+}
+
+function showFormCat(){
+  document.getElementById('form-cat-card').classList.remove('hidden');
+  document.getElementById('form-rut-card').classList.add('hidden');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function showFormRut(catId){
+  catRutForm=catId;
+  const cat=catsCache.find(c=>c.id===catId);
+  document.getElementById('fr-titulo').textContent='Nueva rutina — '+cat.nombre;
+  document.getElementById('fr-cat-label').textContent='Sera la rutina '+String.fromCharCode(65+cat.rutinas.length)+' del ciclo.';
+  document.getElementById('form-rut-card').classList.remove('hidden');
+  document.getElementById('form-cat-card').classList.add('hidden');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function hideForms(){
+  document.getElementById('form-cat-card').classList.add('hidden');
+  document.getElementById('form-rut-card').classList.add('hidden');
+}
+
+async function guardarCat(){
+  const nombre=document.getElementById('fc-nombre').value.trim();
+  const desc=document.getElementById('fc-desc').value.trim();
+  if(!nombre) return;
+  await db.from('categorias').insert({nombre,descripcion:desc,profe_id:usuarioActual.id});
+  document.getElementById('fc-nombre').value='';
+  document.getElementById('fc-desc').value='';
+  hideForms();
+  renderCats();
+}
+
+async function guardarRutina(){
+  if(catRutForm===null) return;
+  const cat=catsCache.find(c=>c.id===catRutForm);
+  const nombre=document.getElementById('fr-nombre').value.trim();
+  const lineas=document.getElementById('fr-ejercicios').value.trim().split('\n').filter(l=>l.trim());
+  if(!nombre||!lineas.length) return;
+  const ejercicios=lineas.map(l=>{
+    const p=l.split(',');
+    const sr=(p[1]||'3x10').trim().split('x');
+    return{n:p[0].trim(),s:parseInt(sr[0])||3,r:parseInt(sr[1])||10};
+  });
+  await db.from('rutinas').insert({categoria_id:catRutForm,nombre,ejercicios,orden:cat.rutinas.length});
+  document.getElementById('fr-nombre').value='';
+  document.getElementById('fr-ejercicios').value='';
+  hideForms();
+  renderCats();
+}
+
+// =============================================
+// RESUMEN SEMANAL
+// =============================================
+async function renderResumen(){
+  await cargarAlumnos();
+  const ahora=Date.now();const semMs=7*864e5;
+  const sesSem=alumnosCache.flatMap(a=>a.sesiones.filter(s=>ahora-new Date(s.fecha)<semMs));
+  const activos=new Set(alumnosCache.filter(a=>a.sesiones.some(s=>ahora-new Date(s.fecha)<semMs)).map(a=>a.id)).size;
+  document.getElementById('rs-sesiones').textContent=sesSem.length;
+  document.getElementById('rs-activos').textContent=activos;
+  document.getElementById('tabla-resumen').innerHTML=alumnosCache.map(a=>{
+    const n=a.sesiones.filter(s=>ahora-new Date(s.fecha)<semMs).length;
+    const info=rutinaDeAlumno(a);
+    const dias=diasParaCambio(a.ciclo_inicio);
+    return `<div class="arow"><div class="av av${a.id%5}">${initials(a.nombre)}</div><div class="f1"><div style="font-size:13px;font-weight:600">${a.nombre}</div><div style="font-size:11px;color:#888">${info?info.rutina.nombre:'—'} · ${dias===0?'<span style="color:#eab308">Cambio pendiente</span>':dias+' dias'}</div></div><span class="badge ${n>0?'bg':'br'}">${n>0?'ENTRENO':'SIN ACTIVIDAD'}</span><span style="font-size:12px;color:#888;margin-left:6px">${n} ses.</span></div>`;
+  }).join('');
+  const alertas=[];
+  alumnosCache.forEach(a=>{
+    const ult=a.sesiones.slice(-4).map(s=>({enc:s.encuesta||{}}));
+    const ep=ult.length?Math.round(ult.reduce((s,x)=>s+(x.enc?.energia||3),0)/ult.length*10)/10:null;
+    const dol=ult.filter(s=>s.enc?.dolor&&s.enc.dolor!=='ninguno').map(s=>s.enc.dolor);
+    if(ep!==null&&ep<2.5) alertas.push(`<div class="arow"><div class="av av${a.id%5}">${initials(a.nombre)}</div><div class="f1"><span style="font-size:13px;font-weight:600">${a.nombre}</span><span style="font-size:12px;color:#eab308;margin-left:8px">Energia promedio baja: ${ep}/5</span></div></div>`);
+    if(dol.length>=2) alertas.push(`<div class="arow"><div class="av av${a.id%5}">${initials(a.nombre)}</div><div class="f1"><span style="font-size:13px;font-weight:600">${a.nombre}</span><span style="font-size:12px;color:#ef4444;margin-left:8px">Dolor frecuente: ${[...new Set(dol)].join(', ')}</span></div></div>`);
+  });
+  document.getElementById('alertas-bienestar').innerHTML=alertas.length?alertas.join(''):'<p>Sin alertas esta semana.</p>';
+}
+
+// =============================================
+// VISTA ALUMNO
+// =============================================
+async function setupVistaAlumno(){
+  if(!alumnoActual||!perfilActual) return;
+  encuesta={energia:0,sueno:0,dolor:''};
+  document.querySelectorAll('.emo-btn').forEach(b=>b.classList.remove('sel'));
+  const info=rutinaDeAlumno(alumnoActual);
+  const sem=semanaEnCiclo(alumnoActual.ciclo_inicio);
+  document.getElementById('al-nombre2').textContent=perfilActual.nombre;
+  document.getElementById('al-rutlabel').textContent=info?`${info.cat.nombre} · ${info.rutina.nombre}`:'Sin rutina asignada. Contactá al profe.';
+  document.getElementById('al-sem-badge').textContent=`SEM ${sem}/6`;
+  const pct=Math.round((sem/SEMANAS)*100);
+  document.getElementById('al-prog-bar').style.width=pct+'%';
+  document.getElementById('al-prog-txt').textContent=pct+'%';
+  document.getElementById('paso-encuesta').classList.remove('hidden');
+  document.getElementById('paso-entrena').classList.add('hidden');
+}
+
+function selEnc(campo,val,btn){
+  encuesta[campo]=val;
+  document.querySelectorAll('[onclick*="selEnc(\''+campo+'\'"]').forEach(b=>b.classList.remove('sel'));
+  btn.classList.add('sel');
+}
+
+async function iniciarEntrenamiento(){
+  if(!alumnoActual) return;
+  const info=rutinaDeAlumno(alumnoActual);
+  document.getElementById('paso-encuesta').classList.add('hidden');
+  document.getElementById('paso-entrena').classList.remove('hidden');
+  document.getElementById('al-nombre3').textContent=perfilActual.nombre;
+  document.getElementById('al-rut3').textContent=info
+    ?`${info.rutina.nombre} · ${new Date().toLocaleDateString('es-AR',{weekday:'long',day:'numeric',month:'long'})}`:'—';
+  document.getElementById('al-enc-resumen').innerHTML=
+    `Energia: ${encuesta.energia||'?'}/5<br>Sueno: ${SUENO_LBL[encuesta.sueno]||'?'}<br>Dolor: ${encuesta.dolor||'—'}`;
+  if(!info){document.getElementById('ejs-hoy').innerHTML='<p>Sin rutina asignada.</p>';return;}
+
+  // Cargar ultima sesion para referencia de pesos
+  const{data:ultSes}=await db.from('sesiones')
+    .select('ejercicios').eq('alumno_id',alumnoActual.id)
+    .order('fecha',{ascending:false}).limit(1);
+  const ultEjs=ultSes?.[0]?.ejercicios||[];
+
+  document.getElementById('ejs-hoy').innerHTML=info.rutina.ejercicios.map((e,ei)=>{
+    const key='ej'+ei;
+    const ue=ultEjs.find(x=>x.ej===e.n);
+    const ref=ue?ue.series.map((s,i)=>'S'+(i+1)+': '+s.kg+'kg×'+s.r).join(' · '):'';
+    let sh='';
+    for(let i=0;i<e.s;i++){
+      const lk=ue?.series[i]?.kg||'';
+      sh+=`<div class="serie-row"><div class="serie-num">S${i+1}</div><span class="serie-lbl">kg</span><input type="number" class="serie-input" id="${key}_kg${i}" value="${lk}" placeholder="—" min="0" step="2.5"/><span class="serie-lbl">reps</span><input type="number" class="serie-input" id="${key}_rp${i}" value="${e.r}" min="1"/><div class="serie-status" id="${key}_done${i}" onclick="toggleSerie('${key}',${i})"></div></div>`;
+    }
+    return `<div class="ej-bloque"><div class="ej-header"><div class="ej-nombre">${e.n}</div><span class="ej-meta">${e.s} series · ${e.r} reps objetivo</span></div>${sh}${ref?`<div class="ultimo-ref">Ultima vez — ${ref}</div>`:''}</div>`;
+  }).join('');
+}
+
+function toggleSerie(key,i){document.getElementById(key+'_done'+i).classList.toggle('done');}
+
+async function guardarSesion(){
+  if(!alumnoActual) return;
+  const info=rutinaDeAlumno(alumnoActual);if(!info) return;
+  const ejercicios=info.rutina.ejercicios.map((e,ei)=>{
+    const key='ej'+ei;
+    const series=Array.from({length:e.s},(_,i)=>({
+      kg:parseFloat(document.getElementById(key+'_kg'+i)?.value)||0,
+      r:parseInt(document.getElementById(key+'_rp'+i)?.value)||e.r,
+      done:document.getElementById(key+'_done'+i)?.classList.contains('done')||false
+    }));
+    return{ej:e.n,series};
+  });
+  const nota=document.getElementById('nota-sesion').value.trim();
+  await db.from('sesiones').insert({
+    alumno_id:alumnoActual.id,
+    rutina_id:info.rutina.id,
+    fecha:new Date().toISOString(),
+    encuesta:encuesta,
+    ejercicios:ejercicios,
+    nota:nota
+  });
+  const ok=document.createElement('div');
+  ok.textContent='✓ Sesion guardada correctamente';
+  ok.style.cssText='padding:10px;background:#0a1f10;color:#22c55e;border:1px solid #15532e;border-radius:8px;font-size:13px;font-weight:700;margin-top:10px;text-align:center';
+  document.getElementById('ejs-hoy').appendChild(ok);
+  setTimeout(()=>{ok.remove();setupVistaAlumno();},2000);
+  document.getElementById('nota-sesion').value='';
+}
+
+async function renderHistorialAlumno(){
+  if(!alumnoActual) return;
+  const{data:sesiones}=await db.from('sesiones')
+    .select('*').eq('alumno_id',alumnoActual.id)
+    .order('fecha',{ascending:true});
+  const sData=(sesiones||[]).map(s=>({...s,ejercicios:s.ejercicios||[],enc:s.encuesta||{}}));
+
+  const rec=calcRecords(sData);
+  document.getElementById('al-records').innerHTML=Object.keys(rec).length
+    ?Object.entries(rec).map(([ej,kg])=>`<div class="record-banner"><div class="f1"><span style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:#f0f0f0">${ej}</span></div><span style="font-size:16px;font-weight:800;color:#f97316">${kg} kg</span><span style="font-size:10px;color:#7c3a0e;margin-left:6px;font-weight:700">RECORD</span></div>`).join('')
+    :'<p>Sin records aun. Empeza a entrenar!</p>';
+
+  const ejMap={};
+  sData.forEach(s=>s.ejercicios.forEach(e=>{
+    if(!ejMap[e.ej])ejMap[e.ej]=[];
+    if(e.series.length) ejMap[e.ej].push(Math.max(...e.series.map(sr=>sr.kg||0)));
+  }));
+  document.getElementById('al-progreso-ej').innerHTML=Object.entries(ejMap).map(([ej,kgs])=>{
+    const pct=kgs.length>1?Math.round(((kgs[kgs.length-1]-kgs[0])/kgs[0])*100):0;
+    const col=pct>0?'#22c55e':pct<0?'#ef4444':'#888';
+    return `<div class="erow"><div class="f1"><div style="font-size:13px;font-weight:700">${ej}</div><div style="font-size:11px;color:#888">${kgs.map(k=>k+'kg').join(' → ')}</div></div><span style="font-size:14px;font-weight:700;color:${col}">${pct>0?'+':''}${pct}%</span></div>`;
+  }).join('')||'<p>Carga al menos 2 sesiones para ver progreso.</p>';
+
+  const cont=document.getElementById('al-historial-full');
+  if(!sData.length){cont.innerHTML='<p>Sin sesiones aun.</p>';return;}
+  cont.innerHTML=[...sData].reverse().map(s=>{
+    const fecha=new Date(s.fecha).toLocaleDateString('es-AR',{weekday:'long',day:'numeric',month:'long'});
+    const encStr=s.enc?.energia?`Energia ${s.enc.energia}/5 · ${SUENO_LBL[s.enc.sueno]||''} · Dolor: ${s.enc.dolor}`:'';
+    return `<div style="padding:12px 0;border-bottom:1px solid #2e2e2e">
+      <div style="font-size:12px;font-weight:700;color:#f97316;margin-bottom:4px;text-transform:uppercase;letter-spacing:.04em">${fecha}</div>
+      ${encStr?`<div style="font-size:11px;color:#555;margin-bottom:6px">${encStr}</div>`:''}
+      ${s.ejercicios.map(e=>`<div style="margin-bottom:6px"><div style="font-size:12px;font-weight:700;margin-bottom:2px">${e.ej}</div><div style="font-size:11px;color:#888">${e.series.map((sr,i)=>`<span style="margin-right:8px;${sr.done?'':'opacity:.4'}">S${i+1}: ${sr.kg}kg×${sr.r}</span>`).join('')}</div></div>`).join('')}
+      ${s.nota?`<div style="font-size:11px;color:#555;font-style:italic;margin-top:4px">"${s.nota}"</div>`:''}
+    </div>`;
+  }).join('');
+}
+
+// =============================================
+// INICIO
+// =============================================
+async function init(){
+  loading(true);
+  const{data:{session}}=await db.auth.getSession();
+  if(session){
+    await setupSesion(session.user);
+  } else {
+    loading(false);
+    document.getElementById('screen-login').classList.remove('hidden');
+  }
+}
+init();
+</script>
+</body>
+</html>
